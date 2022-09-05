@@ -1,11 +1,11 @@
 import Vapor
 
 public struct FormattedResponse {
-	var type: HTTPMediaType
-	var content: ResponseEncodable?
-	var view: View?
-	var status: HTTPResponseStatus = .ok
-	var headers: HTTPHeaders = [:]
+	public var type: HTTPMediaType
+    public var content: ResponseEncodable?
+    public var view: View?
+    public var status: HTTPResponseStatus = .ok
+    public var headers: HTTPHeaders = [:]
 }
 
 
