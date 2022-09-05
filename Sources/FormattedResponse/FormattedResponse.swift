@@ -4,8 +4,16 @@ public struct FormattedResponse {
 	public var type: HTTPMediaType
     public var content: ResponseEncodable?
     public var view: View?
-    public var status: HTTPResponseStatus = .ok
-    public var headers: HTTPHeaders = [:]
+    public var status: HTTPResponseStatus
+    public var headers: HTTPHeaders
+    
+    public init(type: HTTPMediaType, content: ResponseEncodable?, view: View?, status: HTTPResponseStatus = .ok, headers: HTTPHeaders = [:]) {
+        self.type = type
+        self.content = content
+        self.view = view
+        self.status = status
+        self.headers = headers
+    }
 }
 
 
