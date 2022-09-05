@@ -1,6 +1,6 @@
 import Vapor
 
-struct FormattedResponse {
+public struct FormattedResponse {
 	var type: HTTPMediaType
 	var content: ResponseEncodable?
 	var view: View?
@@ -9,7 +9,7 @@ struct FormattedResponse {
 }
 
 
-@resultBuilder struct FormattedResponseBuilder {
+@resultBuilder public struct FormattedResponseBuilder {
 	static func buildBlock(_ request: Request, _ responses: FormattedResponse...) -> EventLoopFuture<Response> {
 		let acceptable = request.headers.accept.map { acceptType -> HTTPMediaType in
 			acceptType.mediaType
@@ -46,6 +46,6 @@ struct FormattedResponse {
 	}
 }
 
-func makeResponse(@FormattedResponseBuilder _ content: () -> EventLoopFuture<Response>) async throws -> Response {
+public func makeResponse(@FormattedResponseBuilder _ content: () -> EventLoopFuture<Response>) async throws -> Response {
 	return try await content().get()
 }
