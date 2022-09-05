@@ -7,7 +7,7 @@ public struct FormattedResponse {
     public var status: HTTPResponseStatus
     public var headers: HTTPHeaders
     
-    public init(type: HTTPMediaType, content: ResponseEncodable?, view: View?, status: HTTPResponseStatus = .ok, headers: HTTPHeaders = [:]) {
+    public init(type: HTTPMediaType, content: ResponseEncodable? = nil, view: View? = nil, status: HTTPResponseStatus = .ok, headers: HTTPHeaders = [:]) {
         self.type = type
         self.content = content
         self.view = view
