@@ -10,7 +10,7 @@ public struct FormattedResponse {
 
 
 @resultBuilder public struct FormattedResponseBuilder {
-	static func buildBlock(_ request: Request, _ responses: FormattedResponse...) -> EventLoopFuture<Response> {
+	public static func buildBlock(_ request: Request, _ responses: FormattedResponse...) -> EventLoopFuture<Response> {
 		let acceptable = request.headers.accept.map { acceptType -> HTTPMediaType in
 			acceptType.mediaType
 		}
