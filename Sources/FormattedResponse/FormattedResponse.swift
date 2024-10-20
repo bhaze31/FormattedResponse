@@ -35,18 +35,31 @@ extension HTTPMediaType: @retroactive Identifiable{
     
     let acceptable = request.headers.accept.map { $0.mediaType }
 
-    let response = responseTypes.first(where: { response in
+    guard let response = responseTypes.first(where: { response in
       switch response {
         case .json:
           return acceptable.contains(.json)
         case .view:
-          return true
+          return acceptable.contains(.html)
         case .redirect:
-          return true
+          return acceptable.contains(.html)
       }
-    })
-    
-    return request.eventLoop.future(Response(status: .ok))
+    }) else {
+      return request.eventLoop.future(Response(status: .badRequest))
+    }
+
+    switch response {
+        case .json(let content, let status, let headers):
+          return content.encodeResponse(status: status, headers: headers, for: request)
+        
+      case .view(let path, let content, let status, let headers):
+          let view = request.view.render(path, content)
+          return view.encodeResponse(status: status, headers: headers, for: request)
+        
+        case .redirect(let path, let status, let headers):
+          return request.redirect(to: path).encodeResponse(status: status, for: request)
+        
+    }
   }
 
 	public static func buildBlock(_ request: Request, _ responses: FormattedResponse...) -> EventLoopFuture<Response> {
