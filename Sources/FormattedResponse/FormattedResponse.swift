@@ -4,6 +4,7 @@ public enum FormattedResponseType {
   case json(ResponseEncodable, HTTPResponseStatus = .ok, HTTPHeaders = [:])
   case view(String, any Content, HTTPResponseStatus = .ok, HTTPHeaders = [:])
   case redirect(String, HTTPResponseStatus = .found, HTTPHeaders = [:])
+  case rss(ResponseEncodable, HTTPResponseStatus = .ok, HTTPHeaders = [:])
 }
 
 public struct FormattedResponse {
@@ -38,27 +39,42 @@ extension HTTPMediaType: @retroactive Identifiable{
     guard let response = responseTypes.first(where: { response in
       switch response {
         case .json:
-          return acceptable.contains(.json)
+          return acceptable.contains(.json) || acceptable.contains(.jsonAPI)
         case .view:
-          return acceptable.contains(.html)
+          return acceptable.contains(.html) || acceptable.contains(.multipart) || acceptable.contains(.formData)
         case .redirect:
-          return acceptable.contains(.html)
+          return acceptable.contains(.html) || acceptable.contains(.multipart) || acceptable.contains(.formData)
+        case .rss:
+          return acceptable.contains(.xml)
       }
     }) else {
-      return request.eventLoop.future(Response(status: .badRequest))
+      guard let response = responseTypes.first else {
+          return request.eventLoop.future(Response(status: .badRequest))
+      }
+      
+      switch response {
+          case .json(let content, let status, let headers):
+            return content.encodeResponse(status: status, headers: headers, for: request)
+          case .view(let path, let content, let status, let headers):
+            let view = request.view.render(path, content)
+            return view.encodeResponse(status: status, headers: headers, for: request)
+          case .redirect(let path, let status, let headers):
+            return request.redirect(to: path).encodeResponse(status: status, for: request)
+          case .rss(let content, let status, let headers):
+            return content.encodeResponse(status: status, headers: headers, for: request)
+      }
     }
 
     switch response {
         case .json(let content, let status, let headers):
           return content.encodeResponse(status: status, headers: headers, for: request)
-        
-      case .view(let path, let content, let status, let headers):
+        case .view(let path, let content, let status, let headers):
           let view = request.view.render(path, content)
           return view.encodeResponse(status: status, headers: headers, for: request)
-        
         case .redirect(let path, let status, let headers):
           return request.redirect(to: path).encodeResponse(status: status, for: request)
-        
+        case .rss(let content, let status, let headers):
+          return content.encodeResponse(status: status, headers: headers, for: request)
     }
   }
 
